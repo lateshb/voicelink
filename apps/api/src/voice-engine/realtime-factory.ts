@@ -39,7 +39,8 @@ export function realtimeForAgent(agent: Agent): RealtimeProvider {
         temperature: agent.llm.temperature,
       });
     }
-    case "gemini-live-2.0": {
+    case "gemini-live-2.0":
+    case "gemini-3.1-flash-live-preview": {
       const apiKey = process.env.GEMINI_API_KEY;
       if (!apiKey) {
         throw new Error("GEMINI_API_KEY missing — cannot start a gemini-live agent");

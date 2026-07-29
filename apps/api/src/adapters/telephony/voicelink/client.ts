@@ -113,11 +113,13 @@ export class VoicelinkClient {
         }
       }
 
-      // 401 + we have credentials + this isn't already a retry → refresh and retry once.
-      if (res.status === 401 && !opts._retry && this.username && this.password) {
+      // 401/403 + we have credentials + this isn't already a retry → refresh and retry once.
+      // VoiceLink returns 403 "DID is not assigned to your reseller account" when the
+      // Sanctum token was silently revoked by a new login elsewhere.
+      if ((res.status === 401 || res.status === 403) && !opts._retry && this.username && this.password) {
         log.warn(
-          { method, path },
-          "Voicelink returned 401 — refreshing bearer and retrying once",
+          { method, path, status: res.status },
+          `Voicelink returned ${res.status} — refreshing bearer and retrying once`,
         );
         await this.refreshBearer();
         return this.request<T>(method, path, body, { _retry: true });

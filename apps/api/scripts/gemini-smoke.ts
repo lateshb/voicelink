@@ -14,7 +14,7 @@ if (!apiKey) {
 
 const provider = new GeminiLiveProvider({
   apiKey,
-  model: "gemini-live-2.0",
+  model: "gemini-3.1-fiash-live-preview",
   voice: process.env.GEMINI_VOICE || "Puck",
   systemPrompt:
     "You are RapidX AI's friendly phone receptionist. Keep every reply to one short sentence.",

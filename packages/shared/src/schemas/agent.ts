@@ -15,6 +15,7 @@ export const RealtimeModel = z.enum([
   "gpt-4o-mini-realtime",
   "gpt-4o-realtime",
   "gemini-live-2.0",
+  "gemini-3.1-flash-live-preview",
 ]);
 
 export const AgentVoice = z.object({
@@ -39,11 +40,11 @@ export const Agent = z.object({
   tenantId: z.string(),
   name: z.string().min(1).max(120),
   prompt: z.string().default(""),
-  flowId: z.string().optional(),
+  flowId: z.string().nullable().optional(),
   voice: AgentVoice,
   llm: AgentLLM,
   tools: z.array(AgentTool).default([]),
-  knowledgeBase: z.string().optional(),
+  knowledgeBase: z.string().nullable().optional(),
   greeting: z.string().default(""),
   endCallTriggers: z.array(z.string()).default([]),
   status: AgentStatus.default("draft"),

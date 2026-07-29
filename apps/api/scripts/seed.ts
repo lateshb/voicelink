@@ -8,13 +8,12 @@ import { MongoClient, ObjectId } from "mongodb";
 import bcrypt from "bcrypt";
 
 const MONGO_URL = process.env.MONGO_URL!;
-const VOICELINK_CLIENT_ID = 1264; // SWATI PRASAD (discovered via /v1/reseller/clients)
+const VOICELINK_CLIENT_ID = 1701; // Antivirus Bazaar (discovered via /v1/reseller/clients)
 
 const TENANT_ID = "rapidx-tenant";
 const AGENT_ID = "rapidx-receptionist";
 const DIDS = [
-  { number: "919484956633", botId: "140" },
-  { number: "919484956952", botId: "141" },
+  { number: "919484959462", botId: "454" },
 ];
 
 const SUPERADMIN = { email: "admin@rapidxai.com", password: "RapidXadmin2026" };
@@ -56,7 +55,7 @@ async function main() {
           "discovery call or take a message with their name and number. Keep replies to one or two short " +
           "sentences. Speak naturally for a phone call. Never use the dash character in your speech.",
         voice: { provider: "gemini-live", providerVoiceId: "Puck" },
-        llm: { realtimeModel: "gemini-live-2.0", temperature: 0.7 },
+        llm: { realtimeModel: "gemini-3.1-flash-live-preview", temperature: 0.7 },
         tools: [],
         greeting:
           "Open the call now: warmly greet the caller, say you are the RapidX AI assistant, and ask how you can help today. Keep it to one short sentence.",

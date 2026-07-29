@@ -44,6 +44,7 @@ const REALTIME_MODELS: RealtimeModel[] = [
   "gpt-4o-mini-realtime",
   "gpt-4o-realtime",
   "gemini-live-2.0",
+  "gemini-3.1-flash-live-preview",
 ];
 
 export function AgentEditor({ agent }: Props) {
@@ -78,7 +79,11 @@ export function AgentEditor({ agent }: Props) {
     void tenantId;
     void createdAt;
     void updatedAt;
-    return rest;
+    // Strip null fields that cause Zod optional validation issues
+    const cleaned = Object.fromEntries(
+      Object.entries(rest).filter(([_, v]) => v !== null)
+    );
+    return cleaned;
   }
 
   async function save() {
@@ -143,6 +148,39 @@ export function AgentEditor({ agent }: Props) {
   );
   const usesLibrary = voicesForProvider.length > 0 && draft.voice.provider !== "cloned";
 
+  async function togglePublish() {
+    const nextStatus = draft.status === "published" ? "draft" : "published";
+    const updated = { ...draft, status: nextStatus };
+    setDraft(updated);
+    setSaving(true);
+    setError(null);
+    try {
+      const url = isNew ? "/api/agents" : `/api/agents/${draft._id}`;
+      const method = isNew ? "POST" : "PUT";
+      const { _id, tenantId, createdAt, updatedAt, ...rest } = updated;
+      void _id; void tenantId; void createdAt; void updatedAt;
+      const cleaned = Object.fromEntries(
+        Object.entries(rest).filter(([_, v]) => v !== null)
+      );
+      const res = await fetch(url, {
+        method,
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(cleaned),
+      });
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(body.error ?? `Publish failed (${res.status})`);
+        return;
+      }
+      setDraft(body as Agent);
+      setSavedAt(new Date());
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Publish failed");
+    } finally {
+      setSaving(false);
+    }
+  }
+
   return (
     <div className="max-w-3xl">
       <div className="flex items-center justify-between mb-6">
@@ -150,9 +188,18 @@ export function AgentEditor({ agent }: Props) {
           <h1 className="text-2xl font-semibold">
             {isNew ? "New agent" : draft.name || "(unnamed agent)"}
           </h1>
-          <p className="text-sm text-zinc-500">
-            Status: <span className="font-medium">{draft.status}</span>
-          </p>
+          <div className="flex items-center gap-2 mt-1">
+            <span className="text-sm text-zinc-500">Status:</span>
+            <span
+              className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
+                draft.status === "published"
+                  ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
+                  : "bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300"
+              }`}
+            >
+              {draft.status}
+            </span>
+          </div>
         </div>
         <div className="flex items-center gap-3">
           {savedAt && !error && (
@@ -169,6 +216,14 @@ export function AgentEditor({ agent }: Props) {
               {deleting ? "Deleting…" : "Delete"}
             </Button>
           )}
+          <Button
+            variant={draft.status === "published" ? "outline" : "default"}
+            onClick={togglePublish}
+            disabled={saving || deleting}
+            className={draft.status !== "published" ? "bg-emerald-600 hover:bg-emerald-700 text-white" : ""}
+          >
+            {draft.status === "published" ? "Unpublish" : "Publish"}
+          </Button>
           <Button onClick={save} disabled={saving || deleting}>
             {saving ? "Saving…" : isNew ? "Create" : "Save"}
           </Button>

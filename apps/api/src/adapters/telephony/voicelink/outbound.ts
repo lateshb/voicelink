@@ -66,8 +66,9 @@ export async function originateCall(
   if (norm.country_code !== undefined) body.country_code = norm.country_code;
   if (input.customParameters !== undefined)
     body.custom_parameters = input.customParameters;
-  if (input.websocketUrl !== undefined) body.websocket_url = input.websocketUrl;
-  if (input.webhookUrl !== undefined) body.webhook_url = input.webhookUrl;
+  // websocket_url and webhook_url are already configured on the bot
+  // via setup-voicelink.ts. Sending them in add_lead triggers a different
+  // DID validation path in VoiceLink that incorrectly rejects the DID.
   if (input.callLimit !== undefined) body.call_limit = input.callLimit;
 
   const res = await client.request<AddLeadResponse>("POST", "/v1/add_lead", body);

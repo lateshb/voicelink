@@ -15,3 +15,4 @@ coverage/
 # API mid-call and kills the WebSocket).
 .mongo-data/
 .playwright-mcp/
+dump.rdb
